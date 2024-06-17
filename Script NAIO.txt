@@ -1,4 +1,8 @@
-use NAIO
+
+DECLARE @Fecha1 DATE = '2024-06-01';
+DECLARE @Fecha2 DATE = '20240601';
+
+
 SELECT 
     M.ccargo_car COD,39 CIA,fecha,M.nfolio RESERV, 1 TIP,A.ident_cli TERCERO,'001' SUC,'' NAC,
 	CONVERT(int,(CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor )) VALOR,CASE WHEN ISNUMERIC(M.nrohab_hab) = 1 THEN CONVERT(varchar(10), M.nrohab_hab) 
@@ -13,7 +17,7 @@ SELECT
     (SELECT Max(telef_cli) FROM Clientes C WHERE  C.ident_cli = A.ident_cli) phone_no
 FROM 
     Movfolio M,Cargos C,Maefolio A
-WHERE  M.ccargo_car = C.ccargo_car AND M.nfolio = A.nfolio AND fecha = '2024-01-27' AND ( M.ccargo_car <> 1000 AND M.ccargo_car NOT IN ( 8,1100, 54, 1010,5016 ) )
+WHERE  M.ccargo_car = C.ccargo_car AND M.nfolio = A.nfolio AND fecha = @Fecha1 AND ( M.ccargo_car <> 1000 AND M.ccargo_car NOT IN ( 8,1100, 54, 1010,5016 ) )
     AND ( m.plaza = '0' OR m.plaza IS NULL )
 
 	UNION
@@ -26,7 +30,7 @@ WHERE  M.ccargo_car = C.ccargo_car AND M.nfolio = A.nfolio AND fecha = '2024-01-
     (SELECT Max(codciud) FROM Clientes C WHERE  C.ident_cli = U.CEDULA) city,
     (SELECT Max(codpais) FROM Clientes C WHERE  C.ident_cli = U.CEDULA) country,
     U.TELEFONO phone_no FROM   Ps_Cuentas U 
-WHERE U.fecha = '20240127' AND U.SERVICIO <> 0
+WHERE U.fecha = @Fecha2 AND U.SERVICIO <> 0
 
 
 	UNION
@@ -42,7 +46,7 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no
  
- from Movfolio  M WHERE M.fecha='2024-01-27' and M.CCARGO_CAR= 1100
+ from Movfolio  M WHERE M.fecha=@Fecha1 and M.CCARGO_CAR= 1100
 
  
 	UNION
@@ -83,7 +87,7 @@ INNER JOIN
 INNER JOIN 
     Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
 WHERE 
-    C.fecha = '20240127'  
+    C.fecha = '20240601'  
     AND C.TRANSFERID IS NULL  
     AND C.PLAZA <>'ATN'  
     AND C.VVENTA >0
@@ -94,7 +98,7 @@ SELECT 5016 COD,39 CIA,fecha,C.cuenta RESERV,1 TIP,'333333333' TERCERO,'001' SUC
 9999 HAB,CONVERT(VARCHAR(10), tiquete)  RECIBO,consuid TRX_NO,tiquete FACTURA,'PROPINA POS' REFERENCIA, C.codcentro + '-' + ' PROPINA' NOTAS,
 '' NRO_TARJETA,'' AUTORIZACION,NULL FECHA_DE_VENC,'' FACT_ASOC,'POS' TIPO_DOC,0 VALOR_ME,'' DISPLAY_NAME,'' NOMBRE,'' address1,
 '' city,''      country,'' phone_no
-FROM   ps_consumos C WHERE  fecha = '20240127' AND PLAZA =' ' AND propinapagada <> 0 and TRANSFERIDO is null 
+FROM   ps_consumos C WHERE  fecha = @Fecha2 AND PLAZA =' ' AND propinapagada <> 0 and TRANSFERIDO is null 
       
 union 
 
@@ -108,7 +112,7 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-01-27' AND ccargo_car = 1000 AND dbcr = 'D'
+ FROM movfolio M WHERE fecha =@Fecha1 AND ccargo_car = 1000 AND dbcr = 'D'
 UNION
 --DEBITO VISA POS
 SELECT '9106'  COD,39 CIA,C.FECHA,C.CUENTA RESERV,1 TIP,'333333333' TERCERO,'001' SUC,'' NAC,CONVERT(int,C.VVENTA*-1) VALOR,9999 HAB,C.TIQUETE RECIBO,
@@ -118,7 +122,7 @@ FROM ps_consumos C
 LEFT JOIN ps_cuentas Q ON c.FECHA = Q.FECHA AND C.CODCAJA = Q.CODCAJA AND C.CUENTA = Q.CUENTA
 LEFT JOIN Ps_producto P ON C.CODPRODUCTO = P.CODPRODUCTO
 LEFT JOIN  Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
-WHERE C.fecha = '20240127' AND CODFPGO = 'TDV'
+WHERE C.fecha = @Fecha2 AND CODFPGO = 'TDV'
 UNION
 --EFECTIVO POS
 SELECT '9100'  COD,39 CIA,C.FECHA,C.CUENTA RESERV,1 TIP,'333333333' TERCERO,'001' SUC,'' NAC,CONVERT(int,C.VVENTA*-1) VALOR,9999 HAB,C.TIQUETE RECIBO,
@@ -128,7 +132,7 @@ FROM ps_consumos C
 LEFT JOIN ps_cuentas Q ON c.FECHA = Q.FECHA AND C.CODCAJA = Q.CODCAJA AND C.CUENTA = Q.CUENTA
 LEFT JOIN Ps_producto P ON C.CODPRODUCTO = P.CODPRODUCTO
 LEFT JOIN  Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
-WHERE C.fecha = '20240127' AND TRANSFERID <> 'B' AND CODFPGO = 'EFE'
+WHERE C.fecha = @Fecha2 AND TRANSFERID <> 'B' AND CODFPGO = 'EFE'
 UNION
 --CREDITO MASTERCARD POS
 SELECT '9109'  COD,39 CIA,C.FECHA,C.CUENTA RESERV,1 TIP,'333333333' TERCERO,'001' SUC,'' NAC,CONVERT(int,C.VVENTA*-1) VALOR,9999 HAB,C.TIQUETE RECIBO,
@@ -138,7 +142,7 @@ FROM ps_consumos C
 LEFT JOIN ps_cuentas Q ON c.FECHA = Q.FECHA AND C.CODCAJA = Q.CODCAJA AND C.CUENTA = Q.CUENTA
 LEFT JOIN Ps_producto P ON C.CODPRODUCTO = P.CODPRODUCTO
 LEFT JOIN  Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
-WHERE C.fecha = '20240127' AND TRANSFERID <> 'B' AND CODFPGO = 'TCM'
+WHERE C.fecha = @Fecha2 AND TRANSFERID <> 'B' AND CODFPGO = 'TCM'
 UNION
 --DEBITO MASTERCARD POS
 SELECT '9109'  COD,39 CIA,C.FECHA,C.CUENTA RESERV,1 TIP,'333333333' TERCERO,'001' SUC,'' NAC,CONVERT(int,C.VVENTA*-1) VALOR,9999 HAB,C.TIQUETE RECIBO,
@@ -148,7 +152,7 @@ FROM ps_consumos C
 LEFT JOIN ps_cuentas Q ON c.FECHA = Q.FECHA AND C.CODCAJA = Q.CODCAJA AND C.CUENTA = Q.CUENTA
 LEFT JOIN Ps_producto P ON C.CODPRODUCTO = P.CODPRODUCTO
 LEFT JOIN  Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
-WHERE C.fecha = '20240127' AND CODFPGO = 'TDM'
+WHERE C.fecha = @Fecha2 AND CODFPGO = 'TDM'
 UNION
 --CREDITO AMERICAN EXPRESS POS
 SELECT '9107'  COD,39 CIA,C.FECHA,C.CUENTA RESERV,1 TIP,'333333333' TERCERO,'001' SUC,'' NAC,CONVERT(int,C.VVENTA*-1) VALOR,9999 HAB,C.TIQUETE RECIBO,
@@ -158,7 +162,7 @@ FROM ps_consumos C
 LEFT JOIN ps_cuentas Q ON c.FECHA = Q.FECHA AND C.CODCAJA = Q.CODCAJA AND C.CUENTA = Q.CUENTA
 LEFT JOIN Ps_producto P ON C.CODPRODUCTO = P.CODPRODUCTO
 LEFT JOIN  Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
-WHERE C.fecha = '20240127' AND CODFPGO = 'TCA'
+WHERE C.fecha = @Fecha2 AND CODFPGO = 'TCA'
 UNION
 --DEBITO AMERICAN EXPRESS POS
 SELECT '9107'  COD,39 CIA,C.FECHA,C.CUENTA RESERV,1 TIP,'333333333' TERCERO,'001' SUC,'' NAC,CONVERT(int,C.VVENTA*-1) VALOR,9999 HAB,C.TIQUETE RECIBO,
@@ -168,7 +172,7 @@ FROM ps_consumos C
 LEFT JOIN ps_cuentas Q ON c.FECHA = Q.FECHA AND C.CODCAJA = Q.CODCAJA AND C.CUENTA = Q.CUENTA
 LEFT JOIN Ps_producto P ON C.CODPRODUCTO = P.CODPRODUCTO
 LEFT JOIN  Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
-WHERE C.fecha = '20240127' AND CODFPGO = 'TDA'
+WHERE C.fecha = @Fecha2 AND CODFPGO = 'TDA'
 UNION
 --CREDITO DINERS POS
 SELECT '9110'  COD,39 CIA,C.FECHA,C.CUENTA RESERV,1 TIP,'333333333' TERCERO,'001' SUC,'' NAC,CONVERT(int,C.VVENTA*-1) VALOR,9999 HAB,C.TIQUETE RECIBO,
@@ -178,7 +182,7 @@ FROM ps_consumos C
 LEFT JOIN ps_cuentas Q ON c.FECHA = Q.FECHA AND C.CODCAJA = Q.CODCAJA AND C.CUENTA = Q.CUENTA
 LEFT JOIN Ps_producto P ON C.CODPRODUCTO = P.CODPRODUCTO
 LEFT JOIN  Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
-WHERE C.fecha = '20240127' AND CODFPGO = 'TCD'
+WHERE C.fecha = @Fecha2 AND CODFPGO = 'TCD'
 UNION
 --DEBITO DINERS POS
 SELECT '9110'  COD,39 CIA,C.FECHA,C.CUENTA RESERV,1 TIP,'333333333' TERCERO,'001' SUC,'' NAC,CONVERT(int,C.VVENTA*-1) VALOR,9999 HAB,C.TIQUETE RECIBO,
@@ -188,7 +192,7 @@ FROM ps_consumos C
 LEFT JOIN ps_cuentas Q ON c.FECHA = Q.FECHA AND C.CODCAJA = Q.CODCAJA AND C.CUENTA = Q.CUENTA
 LEFT JOIN Ps_producto P ON C.CODPRODUCTO = P.CODPRODUCTO
 LEFT JOIN  Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
-WHERE C.fecha = '20240127' AND CODFPGO = 'TDN'
+WHERE C.fecha = @Fecha2 AND CODFPGO = 'TDN'
 UNION
 --POS MASTERCARD FRONT
 select  M.CCARGO_CAR COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
@@ -200,7 +204,7 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-01-27' AND FPAGO = 'T' AND PLAZA = 'MTC' AND dbcr = 'D'
+ FROM movfolio M WHERE fecha =@Fecha1 AND FPAGO = 'T' AND PLAZA = 'MTC' AND dbcr = 'D'
  UNION
  --POS DINNERS FRONT
 select  M.CCARGO_CAR COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
@@ -212,7 +216,7 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-01-27' AND FPAGO = 'T' AND PLAZA = 'DIN' AND dbcr = 'D'
+ FROM movfolio M WHERE fecha =@Fecha1 AND FPAGO = 'T' AND PLAZA = 'DIN' AND dbcr = 'D'
  UNION
  --POS AMERICAN EXPRESS FRONT
 select  M.CCARGO_CAR COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
@@ -224,7 +228,7 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-01-27' AND FPAGO = 'T' AND PLAZA = 'AMX' AND dbcr = 'D'
+ FROM movfolio M WHERE fecha =@Fecha1 AND FPAGO = 'T' AND PLAZA = 'AMX' AND dbcr = 'D'
  UNION
  -- CREDITO VISA POS
 SELECT '9106'  COD,39 CIA,C.FECHA,C.CUENTA RESERV,1 TIP,'333333333' TERCERO,'001' SUC,'' NAC,CONVERT(int,C.VVENTA*-1) VALOR,9999 HAB,C.TIQUETE RECIBO,
@@ -234,7 +238,7 @@ FROM ps_consumos C
 LEFT JOIN ps_cuentas Q ON c.FECHA = Q.FECHA AND C.CODCAJA = Q.CODCAJA AND C.CUENTA = Q.CUENTA
 LEFT JOIN Ps_producto P ON C.CODPRODUCTO = P.CODPRODUCTO
 LEFT JOIN  Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
-WHERE C.fecha = '20240127' AND CODFPGO = 'TCV'
+WHERE C.fecha = @Fecha2 AND CODFPGO = 'TCV'
 UNION
 --ALOJAMIENTO EXCENTO 5012
 select  5012 COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
@@ -248,73 +252,3 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
  FROM movfolio M WHERE fecha ='2024-05-02' AND ccargo_car = 5012
 
-
-  UNION
-
---MISCELANEOS
- select  5032 COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
-'' NAC, CONVERT(INT,valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
-nroregis TRX_NO, 12344 FACTURA, M.MOTIVO REFERENCIA, M.MOTIVO NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
-M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
-(SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
- (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
- (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
- (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
- (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-05-02' AND ccargo_car = 5032
-
- UNION
-
- --COMISION DE TRANSPORTE
-  select  5004 COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
-'' NAC, CONVERT(INT,valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
-nroregis TRX_NO, 12344 FACTURA, M.MOTIVO REFERENCIA, M.MOTIVO NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
-M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
-(SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
- (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
- (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
- (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
- (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-05-02' AND ccargo_car = 5004
-
- UNION
-
- --LAVANDERIA
-   select  5004 COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
-'' NAC, CONVERT(INT,valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
-nroregis TRX_NO, 12344 FACTURA, M.MOTIVO REFERENCIA, M.MOTIVO NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
-M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
-(SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
- (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
- (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
- (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
- (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-05-02' AND TRANSFERID IS NULL AND ccargo_car = 5000
-
- UNION
-
---SERVICIO MESEROS
-    select  5004 COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
-'' NAC, CONVERT(INT,valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
-nroregis TRX_NO, 12344 FACTURA, M.MOTIVO REFERENCIA, M.MOTIVO NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
-M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
-(SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
- (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
- (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
- (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
- (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-05-02' AND TRANSFERID IS NULL AND ccargo_car = 2002
-
- UNION
-
---CONSIGNACION
-     select  5004 COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
-'' NAC, CONVERT(INT,valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
-nroregis TRX_NO, 12344 FACTURA, M.MOTIVO REFERENCIA, M.MOTIVO NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
-M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
-(SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
- (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
- (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
- (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
- (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-05-02' AND TRANSFERID IS NULL AND ccargo_car = 1000 AND DBCR = 'C' AND MOTIVO= 'CONSIGNACION'
