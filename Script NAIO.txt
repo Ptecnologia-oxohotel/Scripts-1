@@ -250,5 +250,5 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-05-02' AND ccargo_car = 5012
+ FROM movfolio M WHERE fecha =@Fecha1 AND ccargo_car = 5012
 
