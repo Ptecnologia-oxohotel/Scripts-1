@@ -1,0 +1,1 @@
+SELECT * FROM  movfolio WHERE FECHA = '2024-08-01'  AND CCARGO_CAR = 5502   AND  dbcr = 'C'
