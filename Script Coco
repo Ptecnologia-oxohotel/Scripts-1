@@ -1,3 +1,5 @@
+
+
  DECLARE @Fecha1 DATE = '2024-08-01';
 
 --ALOJAMIENTO ACANTILADO
@@ -68,6 +70,19 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
  FROM movfolio M WHERE fecha =@Fecha1 AND CCARGO_CAR = 7000
+
+ UNION
+
+select  8 COD , 41 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
+'' NAC, CONVERT(INT,valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
+nroregis TRX_NO, 12344 FACTURA, M.MOTIVO REFERENCIA, M.MOTIVO NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
+M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
+(SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
+ (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
+ (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
+ (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
+ (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
+ FROM movfolio M WHERE fecha =@Fecha1 AND CCARGO_CAR = 8
 
  UNION
 
@@ -158,3 +173,7 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
  FROM movfolio M WHERE fecha =@Fecha1 AND PLAZA = 'MTC'
+
+
+
+
