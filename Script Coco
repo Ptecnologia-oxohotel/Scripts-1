@@ -1,6 +1,6 @@
-use COCO 
+use DSetenta_Zeus
 
- DECLARE @Fecha1 DATE = '2024-08-08';
+ DECLARE @Fecha1 DATE = '2024-09-12';
 
 --ALOJAMIENTO 
  select  1001 COD , 41 CIA,CONVERT(VARCHAR(10), M.FECHA, 103) AS FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
@@ -12,7 +12,7 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha =@Fecha1 AND CCARGO_CAR = 1001 AND M.DBCR = 'D' AND TRANSFERID IS NULL
+ FROM movfolio M WHERE fecha =@Fecha1 AND CCARGO_CAR = 1001 
 
  UNION
 
@@ -31,16 +31,29 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  UNION
 
  --DEPOSITO DE RESERVA
-select  1010 COD , 41 CIA,CONVERT(VARCHAR(10), M.FECHA, 103) AS FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
+ select  1010 COD , 41 CIA,CONVERT(VARCHAR(10), M.FECHA, 103) AS FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
 '' NAC, (CASE WHEN dbcr = 'C' THEN -1 ELSE 1 END * valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
-nroregis TRX_NO, M.VOUCHE FACTURA, M.MOTIVO REFERENCIA, M.MOTIVO NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
+nroregis TRX_NO, M.VOUCHE FACTURA, M.MOTIVO REFERENCIA, M.DBCR NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
 M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
 (SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
  (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
  (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha =@Fecha1 AND CCARGO_CAR = 1010
+ FROM movfolio M WHERE fecha =@Fecha1 AND CCARGO_CAR = 1010 AND m.MOTIVO is null
+
+	UNION
+
+  select  1011 COD , 41 CIA,CONVERT(VARCHAR(10), M.FECHA, 103) AS FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
+'' NAC, (CASE WHEN dbcr = 'C' THEN -1 ELSE 1 END * valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
+nroregis TRX_NO, M.VOUCHE FACTURA, M.MOTIVO REFERENCIA, M.DBCR NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
+M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
+(SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
+ (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
+ (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
+ (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
+ (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
+ FROM movfolio M WHERE fecha =@Fecha1 AND CCARGO_CAR = 1010 AND NFOLIO is not null
 
  UNION
 
@@ -368,7 +381,7 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
  (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha ='2024-09-04' AND CCARGO_CAR = 1100 and TRANSFERID is null
+ FROM movfolio M WHERE fecha =@Fecha1 AND CCARGO_CAR = 1100
 
  UNION
 
