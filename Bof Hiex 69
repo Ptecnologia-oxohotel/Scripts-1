@@ -1,3 +1,4 @@
+
 SELECT  
     F.trx_code COD,
     F.resort CIA,
@@ -27,7 +28,7 @@ SELECT
     N.COUNTRY COUNTRY,
     N.PHONE_NO PHONE_NO,
     N.EMAIL EMAIL,
-    '110101' CODE_POSTAL
+    '1102' CODE_POSTAL
     
 FROM  
     FINANCIAL_TRANSACTIONS_E F
