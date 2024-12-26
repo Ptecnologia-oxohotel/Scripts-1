@@ -1,9 +1,12 @@
+
+
     SELECT 
     TO_CHAR('6666') AS COD,
     F.resort AS CIA,
     F.trx_date AS FECHA,
     F.ORIGINAL_RESV_NAME_ID AS RESERV,
-    NVL(N.ID_TYPE, '2') AS TIP,
+    CASE WHEN N.ID_TYPE = '1' THEN '13' WHEN N.ID_TYPE = '3' THEN '41' 
+    WHEN N.ID_TYPE = '5' THEN '22' WHEN N.ID_TYPE = '30' THEN '12' ELSE '2' END AS TIP,
     NVL(N.TAX1_NO, '222222223') AS TERCERO,
     N.NAME_KEYWORDS AS SUC,
     N.NATIONALITY AS NAC,
@@ -42,7 +45,8 @@ SELECT
     F.resort AS CIA,
     F.trx_date AS FECHA,
     F.ORIGINAL_RESV_NAME_ID AS RESERV,
-    NVL(N.ID_TYPE, '2') AS TIP,
+    CASE WHEN N.ID_TYPE = '1' THEN '13' WHEN N.ID_TYPE = '3' THEN '41' 
+    WHEN N.ID_TYPE = '5' THEN '22' WHEN N.ID_TYPE = '30' THEN '12' ELSE '2' END AS TIP,
     NVL(N.TAX1_NO, '222222223') AS TERCERO,
     N.NAME_KEYWORDS AS SUC,
     N.NATIONALITY AS NAC,
@@ -81,7 +85,8 @@ WHERE
     F.resort AS CIA,
     F.trx_date AS FECHA,
     F.ORIGINAL_RESV_NAME_ID AS RESERV,
-    NVL(N.ID_TYPE, '2') AS TIP,
+    CASE WHEN N.ID_TYPE = '1' THEN '13' WHEN N.ID_TYPE = '3' THEN '41' 
+    WHEN N.ID_TYPE = '5' THEN '22' WHEN N.ID_TYPE = '30' THEN '12' ELSE '2' END AS TIP,
     NVL(N.TAX1_NO, '222222223') AS TERCERO,
     N.NAME_KEYWORDS AS SUC,
     N.NATIONALITY AS NAC,
@@ -112,3 +117,23 @@ WHERE
     WHERE 
         F.TRX_DATE = TO_DATE('03-DEC-2024', 'DD-MON-YYYY') 
         AND F.TRX_CODE >= '9000';
+        
+        
+        
+    select n.tax1_no,n.* from name_view n where n.TAX1_NO = '1';
+    
+    
+    SELECT * FROM document_types_e
+    
+    
+    1	Cedula
+3	Pasaporte
+5	Cedula Extranjería
+30	Menor de Edad NUI
+10	Documento Extranjero
+    
+    
+    
+    
+    
+    
