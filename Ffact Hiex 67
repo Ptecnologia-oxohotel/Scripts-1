@@ -1,0 +1,340 @@
+function detailFormula return Char is
+
+  out_file  Text_IO.File_Type;
+  cFileName varchar2(256);  
+  cOutFile varchar2(256);  
+  cFilePath varchar2(256);
+  cBofPath varchar2(2);  
+  cAppServer varchar2(30);
+    v_path varchar (256);
+   V_COMP VARCHAR (10);
+  
+  --this is the main cursor that extracts the data to be written to the text file
+  --overwrite with your own query
+  cursor GetString is
+------ cambiar la sentncia dentro de aca --------------------
+SELECT a.*,
+       decode(nv.name_type,'D',nv.passport,nv.tax1_no) tercero,
+       nvl(nv.nationality,'xxx') nacionalidad, 
+       nv.display_name,
+       nv.name ntercero,
+       nvl(nv.first,'') nombre,
+       nv.address1,
+       nv.city,
+       nv.country,
+       nv.phone_no 
+FROM (
+
+SELECT distinct
+ft.trx_code codigo_transaccion, 
+substr(ft.resort,3,3) compania,
+to_char(ft.trx_date,'DD/MM/YY') fecha,
+lpad(rn.confirmation_no,8) Reserva,
+lpad( decode( nvl(ft.ar_led_credit,0),0,(decode(nvl(na2.name_type,na.name_type),'D', decode(na.nationality,'CO','001','002') , '003' )),(decode(nvl(na3.name_type,na.name_type),'D', decode(na.nationality,'CO','001','002') , '003' ))),3) tipo_tercero,
+lpad(nvl(na2.udfc03,na2.udfc03),3) sucursal,
+lpad( to_char(decode(nvl(ft.ar_led_credit,0),0,Nvl(ft.net_amount,nvl(ft.guest_account_credit,FT.dep_led_credit)),nvl(arp.applied_amt,ft.net_amount)),'99999999999999'),20) valor_credito_debito,
+lpad(ft.room,5) numero_de_habitacion,
+decode (ft.recpt_type, 'PAR','01'||FT.recpt_no,'CUX','02'||FT.recpt_no, 'RDR', '03'||FT.recpt_no, 'POR', '04'||FT.recpt_no, null, ' ') RECIBO, 
+na.name_type,
+ft.trx_no TRX_NO,
+FTAX.bill_no FACTURA,
+RPAD(FT.reference,40,' ') REFERENCIA,
+RPAD(FT.remark,40,' ') NOTAS,
+lpad(nc.credit_card_number_str,25) numero_de_tarjeta,
+'          ' autorizacion,
+to_char(nc.credit_card_expiration_date,'DD/MM/YY') fecha_de_vencimiento,
+'0' VALOR_ME,
+
+case 
+when ft.AR_LED_DEBIT is not null then 'AR_DB' 
+WHEN ft.AR_LED_CREDIT is not null then 'AR_CR'  
+WHEN ft.DEP_LED_CREDIT  is not null then 'DEP_CR' 
+WHEN ft.DEP_LED_DEBIT is not null then 'DEP_DB'
+when ft.QUEUE_NAME = 'NC_HOC4' THEN 'NCREDITO' ELSE 'FACTURA' end tipo_doc,
+
+case when ft.bill_no is null then nvl(rou.bill_to_name_id,ft.name_id) else ftax.payee_name_id end tercero_name_id,
+to_char(decode(nvl(ft.ar_led_credit,0),0,nvl(ftax.associated_bill_no,''),nvl(arp.cons_bill_no,''))) fact_asoc
+
+from financial_transactions ft,
+     FOLIO_TAX FTAX,
+     name na,
+     reservation_name rn,
+     name_credit_card nc,
+     trx_routing_instructions rou,
+     ar_payment_info arp, --para los pagos de ar 10/12/07
+     name na2,
+     Ar$_account nar,
+     name na3
+
+where ft.trx_Date=:up_from_Date--'01-apr-11' 
+    and FT.resort=pms_p.resort
+    and ( nvl(ft.net_amount,0) <> 0 OR ft.trx_code = pms_p.get_parameter('DEPOSIT_LED_TRX_CODE') OR nvl(ft.dep_led_debit,0)<>0 OR nvl(ft.dep_led_CREDIT,0)<>0 OR nvl(ft.guest_account_credit,0)<>0 )
+----***************
+--and ft.display_yn ='Y'
+    and ft.trx_code not in ('9000','9005','9004','8065')
+--folio tax
+    and ft.resort=ftax.resort(+)
+    and ft.bill_no=ftax.bill_no(+)
+    and nvl(ft.resv_name_id,-1)=nvl(ftax.resv_name_id(+),-1)
+    and nvl(ft.folio_type,-1)=nvl(ftax.folio_type(+),-1)
+
+    and ft.folio_view=ftax.folio_view(+)
+    and na.name_id=ft.name_id
+-- res name
+    and rn.name_id(+)=ft.name_id
+    and rn.resort (+)= ft.resort
+    and nvl(ft.resv_name_id,-1) = nvl(rn.resv_name_id(+),-1)		  
+    and ft.credit_card_id=nc.credit_card_id(+)
+    and ft.resort=rou.resort(+)
+    and nvl(ft.resv_name_id,-1)=nvl(rou.resv_name_id(+),-1)
+    and ft.folio_view=rou.folio_view(+)
+    and ft.routing_instrn_id = rou.routing_instructions_id(+)
+    and rou.billing_instrn_code(+) is not null --para evitar duplicados cuando hay varios routing a una misma ventana
+    and rou.routing_type(+) ='W' 
+    and arp.payment_trx(+) = ft.trx_no
+    and na2.name_id(+)=rou.bill_to_name_id
+    and ft.ar_number=nar.account_code(+)
+    and nar.resort(+)=pms_p.resort
+    and nar.name_id=na3.name_id(+)
+union all 
+
+SELECT distinct-- el efectivo total sumando los dolares
+ft.trx_code codigo_transaccion,
+substr(ft.resort,3,3) compania,
+to_char(ft.trx_date,'DD/MM/YY') fecha,
+lpad(rn.confirmation_no,8) Reserva,
+lpad( decode( nvl(ft.ar_led_credit,0),0,(decode(nvl(na2.name_type,na.name_type),'D', decode(na.nationality,'CO','001','002') , '003' )),(decode(nvl(na3.name_type,na.name_type),'D', decode(na.nationality,'CO','001','002') , '003' ))),3) tipo_tercero,
+lpad(nvl(na2.udfc03,na2.udfc03),3) sucursal,
+lpad( to_char(decode(nvl(ft.ar_led_credit,0),0,Nvl(ft.net_amount,nvl(ft.guest_account_credit,nvl(FT.dep_led_credit,ft.trx_amount))),nvl(arp.applied_amt,ft.net_amount)),'99999999999999D99'),20) valor_credito_debito,
+
+lpad(ft.room,5) numero_de_habitacion, 
+decode (ft.recpt_type, 'PAR','01'||FT.recpt_no,'CUX','02'||FT.recpt_no, 'RDR', '03'||FT.recpt_no, 'POR', '04'||FT.recpt_no, null, ' ')  recibo,
+na.name_type,
+ft.trx_no,
+FT.bill_no FACTURA,
+RPAD(FT.reference,40,' ') REFERENCIA,
+RPAD(FT.remark,40,' ') NOTAS,
+lpad(' ',25) numero_de_tarjeta,
+'          ' autorizacion,
+lpad(' ',8) fecha_de_vencimiento,
+lpad(to_char(ft.posted_amount,'9999999999999'),20) valor_me,
+--*******
+
+case 
+when ft.AR_LED_DEBIT is not null then 'AR_DB' 
+WHEN ft.AR_LED_CREDIT is not null then 'AR_CR'  
+WHEN ft.DEP_LED_CREDIT  is not null then 'DEP_CR' 
+WHEN ft.DEP_LED_DEBIT is not null then 'DEP_DB'
+when ft.QUEUE_NAME = 'NC_HOC4' THEN 'NCREDITO' ELSE 'FACTURA' end tipo_doc,
+
+case when ft.bill_no is null then nvl(rou.bill_to_name_id,ft.name_id) else ftax.payee_name_id end tercero_name_id,
+to_char(decode(nvl(ft.ar_led_credit,0),0,nvl(ftax.associated_bill_no,''),nvl(arp.cons_bill_no,''))) fact_asoc
+
+FROM financial_transactions ft,
+     name na,
+     reservation_name rn,
+     folio_tax ftax,
+     trx_routing_instructions rou,
+     name na2,
+     ar_payment_info arp,
+     Ar$_account nar,
+     name na3
+where
+    	ft.ar_number=nar.account_code(+)
+	and nar.resort(+)=pms_p.resort
+	and na3.name_id(+)=nar.name_id
+	and ft.resort=pms_p.resort 
+	and ft.trx_date=:up_from_date
+	and na.name_id=ft.name_id
+	and rn.name_id(+)=ft.name_id
+	and rn.resort (+)= ft.resort
+	and ft.resort=ftax.resort(+)
+	and ft.bill_no=ftax.bill_no(+)
+  and nvl(ft.resv_name_id,-1)=nvl(ftax.resv_name_id(+),-1)
+  and nvl(ft.folio_type,-1)=nvl(ftax.folio_type(+),-1)
+	and ft.folio_view=ftax.folio_view(+)
+	and rou.resort(+)=ft.resort
+	and rou.billing_instrn_code(+) is not null --para evitar duplicados cuando hay varios routing a una misma ventana
+	and nvl(rou.resv_name_id(+),-1)=nvl(ft.resv_name_id,-1)
+	and rou.folio_view(+)=ft.folio_view
+	and na2.name_id(+)=rou.bill_to_name_id
+	and rou.routing_type(+) ='W' 
+	and ( nvl(ft.net_amount,0) <> 0  OR ft.posting_type='CURRENCY_EXCHANGE' OR ft.trx_code = pms_p.get_parameter('DEPOSIT_LED_TRX_CODE') OR nvl(ft.dep_led_debit,0)<>0 OR nvl(ft.dep_led_CREDIT,0)<>0 OR nvl(ft.guest_account_credit,0)<>0 )
+	and nvl(ft.resv_name_id,-1) = nvl(rn.resv_name_id(+),-1)
+	and ft.display_yn ='Y'
+	and arp.payment_trx(+) = ft.trx_no
+	and ft.trx_code in ('9000','9005','9004','8065')   --- incluir currency exchange
+
+union all 
+
+SELECT distinct-- solo las cuentas corrientes
+ft.trx_code codigo_transaccion, 
+substr(ft.resort,3,3) compania,
+to_char(ft.trx_date,'DD/MM/YY') fecha,
+lpad(rn.confirmation_no,8) Reserva,
+lpad( decode( nvl(ft.ar_led_credit,0),0,
+(decode(nvl(na2.name_type,na.name_type),'D', decode(na.nationality,'CO','001','002') , '003' )),
+(decode(nvl(na3.name_type,na.name_type),'D', decode(na.nationality,'CO','001','002') , '003' ))),3) tipo_tercero,
+lpad(nvl(na2.udfc03,na2.udfc03),3) sucursal,
+lpad( to_char(decode(nvl(ft.ar_led_credit,0),0,Nvl(ft.net_amount,nvl(ft.guest_account_credit,FT.dep_led_credit)),nvl(arp.applied_amt,ft.net_amount)),'99999999999999'),20) valor_credito_debito,
+lpad(ft.room,5) numero_de_habitacion,
+decode (ft.recpt_type, 'PAR','01'||FT.recpt_no,'CUX','02'||FT.recpt_no, 'RDR', '03'||FT.recpt_no, 'POR', '04'||FT.recpt_no, null, ' ')  recibo,
+na.name_type,
+ft.trx_no,
+FTAX.bill_no FACTURA,
+RPAD(FT.reference,40,' ') REFERENCIA,
+RPAD(FT.remark,40,' ') NOTAS,
+lpad(' ',25) numero_de_tarjeta,
+'          ' autorizacion,
+lpad(' ',8) fecha_de_vencimiento,
+'0' VALOR_ME,
+
+case 
+when ft.AR_LED_DEBIT is not null then 'AR_DB' 
+WHEN ft.AR_LED_CREDIT is not null then 'AR_CR'  
+WHEN ft.DEP_LED_CREDIT  is not null then 'DEP_CR' 
+WHEN ft.DEP_LED_DEBIT is not null then 'DEP_DB'
+when ft.QUEUE_NAME = 'NC_HOC4' THEN 'NCREDITO' ELSE 'FACTURA' end tipo_doc,
+
+
+case when ft.bill_no is null then nvl(rou.bill_to_name_id,ft.name_id) else ftax.payee_name_id end tercero_name_id,
+to_char(decode(nvl(ft.ar_led_credit,0),0,nvl(ftax.associated_bill_no,''),nvl(arp.cons_bill_no,'')))fact_asoc
+
+FROM	financial_transactions ft,
+	name na,
+	reservation_name rn,
+	folio_tax ftax,
+	trx_routing_instructions rou,
+	ar_payment_info arp,
+	name na2,
+	Ar$_account nar,
+	name na3
+
+where
+	ft.ar_number=nar.account_code(+)
+	and nar.resort(+)=pms_p.resort
+	and na3.name_id(+)=nar.name_id
+	and ft.resort=pms_p.resort 
+	and ft.trx_date=:up_from_date
+	and na.name_id=ft.name_id
+	and rn.name_id(+)=ft.name_id
+	and rn.resort (+)= ft.resort
+	and ft.resort=ftax.resort(+)
+	and ft.bill_no=ftax.bill_no(+)
+  and nvl(ft.resv_name_id,-1)=nvl(ftax.resv_name_id(+),-1)
+  and nvl(ft.folio_type,-1)=nvl(ftax.folio_type(+),-1)
+	and ft.folio_view=ftax.folio_view(+)
+	and rou.resort(+)=ft.resort
+	and nvl(rou.resv_name_id(+),-1)=nvl(ft.resv_name_id,-1)
+	and rou.folio_view(+)=ft.folio_view
+	and na2.name_id(+)=rou.bill_to_name_id
+	and rou.routing_type(+) ='W' 
+	and rou.billing_instrn_code(+) is not null --para evitar duplicados cuando hay varios routing a una misma ventana
+	and ( nvl(ft.price_per_unit,0) <> 0)
+	and nvl(ft.resv_name_id,-1) = nvl(rn.resv_name_id(+),-1)
+	and ft.display_yn ='Y'
+	and ft.trx_code in ('90300')
+	and arp.payment_trx(+) = ft.trx_no
+  AND FTAX.INVOICE_NO IS NOT NULL
+
+order by 1 ) a,
+	name_view nv
+WHERE a.tercero_name_id = nv.name_id(+);
+
+---------------------------------------------------------------------------------- hasta aca---------------------------	
+ BEGIN
+ 
+   v_path :='D:\bof_export\';
+   V_COMP:='\';
+   -- SELECT substr(pms_p.get_parameter('CUST_REPORTS'),1,2) 
+     --INTO cBofPath 
+   --  FROM dual;
+     
+  -- cFilePath := lower(cBofPath || '\micros\opera\export\' || USER || '\' || :p_resort || '\');
+   cFilePath := lower(V_PATH||PMS_P.RESORT||V_COMP);
+   --this select is for the file name. use your own formulas  
+   
+   
+   
+   /*RUTA anterior
+   -- SELECT substr(pms_p.get_parameter('CUST_REPORTS'),1,2) 
+     --INTO cBofPath 
+   --  FROM dual;
+     
+  -- cFilePath := lower(cBofPath || '\micros\opera\export\' || USER || '\' || :p_resort || '\');
+   cFilePath := lower('D:\bof_export\');
+   --this select is for the file name. use your own formulas
+ */
+ 
+   ---- modificar nombre de archivo a dejar----------------
+   SELECT 'BOF_TRIAL' || :p_resort || To_char(:up_from_date,'YYMMDD') || '.TXT' 
+     INTO cFileName 
+     FROM dual;
+   
+   SELECT pms_p.get_parameter('REPORT_APPLICATION_SERVER_NAME') 
+     INTO cAppServer 
+     FROM dual;
+
+   cOutFile := lower(cAppServer || '/export/' || user || '/' || :p_resort || '/' || cFileName);
+   cFileName := cFilePath || cFileName;
+   
+   out_file := Text_IO.Fopen(cFileName, 'w');
+   
+   --uncomment next line if header is needed
+    Text_IO.Put_Line(out_file, 'COD |CIA|FECHA   |RESERV  |TIP|TERCERO        |SUC|NAC|VALOR               |HAB  |RECIBO   |TRX_NO| FACTURA |REFERENCIA   | NOTAS  | NRO_TARJETA | AUTORIZACION | FECHA_DE_VENC |FACT_ASOC| TIPO_DOC |  VALOR_ME|display_name|nombre|address1|city|country|phone_no');
+--    Text_IO.Put_Line(out_file, 'COD |CIA|FECHA   |RESERV  |TIP|TERCERO        |terce_nID|SUC|NAC|VALOR               |HAB  |RECIBO   |TRX_NO| FACTURA |REFERENCIA   | NOTAS  | NRO_TARJETA | AUTORIZACION | FECHA_DE_VENC |FACT_ASOC| TIPO_DOC |  VALOR_ME');
+    
+   --open the cursor and fetch for records
+   --- cambiar aca el nombre de los campos ejemplo w.campo1---------------------------------------
+   FOR w IN GetString 
+   LOOP
+ 			Text_IO.Put(out_file, w.codigo_transaccion||CHR(124));
+      Text_IO.Put(out_file, w.Compania||CHR(124));
+      Text_IO.Put(out_file, w.Fecha||CHR(124));
+      Text_IO.Put(out_file, w.Reserva||CHR(124));
+      Text_IO.Put(out_file, w.tipo_tercero||CHR(124));
+      Text_IO.Put(out_file, w.tercero||CHR(124));
+--      Text_IO.Put(out_file, w.tercero_name_id||CHR(124));
+      Text_IO.Put(out_file, w.sucursal||CHR(124));
+      Text_IO.Put(out_file, w.nacionalidad||CHR(124));
+      Text_IO.Put(out_file, w.Valor_credito_debito||CHR(124));
+      Text_IO.Put(out_file, w.Numero_de_Habitacion||CHR(124));
+      Text_IO.Put(out_file, w.recibo||CHR(124));
+      Text_IO.Put(out_file, w.trx_no||CHR(124));
+      Text_IO.Put(out_file, w.FACTURA||CHR(124));
+      Text_IO.Put(out_file, w.REFERENCIA||CHR(124));
+      Text_IO.Put(out_file, w.NOTAS||CHR(124));
+      Text_IO.Put(out_file, w.NUMERO_DE_TARJETA||CHR(124));
+      Text_IO.Put(out_file, w.AUTORIZACION||CHR(124));
+      Text_IO.Put(out_file, w.FECHA_DE_VENCIMIENTO||CHR(124));
+      Text_IO.Put(out_file, w.Fact_asoc||CHR(124));
+      Text_IO.Put(out_file, w.tipo_doc||CHR(124));
+      Text_IO.Put(out_file, w.VALOR_ME||CHR(124));
+      Text_IO.Put(out_file, w.ntercero||CHR(124));
+      Text_IO.Put(out_file, w.nombre||CHR(124));
+      Text_IO.Put(out_file, w.address1||CHR(124));
+      Text_IO.Put(out_file, w.city||CHR(124));
+      Text_IO.Put(out_file, w.country||CHR(124));
+      Text_IO.Put(out_file, w.phone_no||CHR(124));
+     Text_IO.New_Line(out_file);      
+   END LOOP; 
+   Text_IO.Fclose (out_file);
+
+   RETURN (cOutFile);
+        
+EXCEPTION
+   WHEN OTHERS
+   THEN
+    	IF Text_IO.Is_Open(out_file) 
+    	THEN
+    	   Text_IO.Fclose(out_file);
+    	END IF;
+   RETURN (SQLERRM || ' on detail formula, please check.');
+
+END;
+
+    
+    
+    
+
+
