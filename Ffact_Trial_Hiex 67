@@ -31,7 +31,7 @@ SELECT distinct
 				lpad(nvl(nv.udfc03,'000'),3,' ') SUCURSAL,
 				lpad((case when (nv.nationality is null) then ' ' else nv.nationality end),3,' ') NACIONALIDAD,
 				lpad(rv.confirmation_no,8,' ') RESERVA, 
-				lpad(ft1.trx_code,4,' ') CODIGO_TRANSACCION,
+				lpad(ft1.trx_code,5,' ') CODIGO_TRANSACCION,
 				to_char(FT1.TRX_DATE,'DD/MM/YY') FECHA_TRANSACCION,
 				lpad(to_char(Nvl((ft1.net_amount),nvl((ft1.posted_amount),2)),'99999999999999'),20) valor_total,-- PRUEBA
 				ft1.exchange_rate exchange_rate,
@@ -87,7 +87,7 @@ SELECT distinct
 				lpad(nvl(nv.udfc03,'000'),3,' ') SUCURSAL,
 				lpad((case when (nv.nationality is null) then ' ' else nv.nationality end),3,' ') NACIONALIDAD,
 				lpad(rv.confirmation_no,8,' ') RESERVA, 
-				lpad(ft1.trx_code,4,' ') CODIGO_TRANSACCION,
+				lpad(ft1.trx_code,5,' ') CODIGO_TRANSACCION,
 				to_char(FT1.TRX_DATE,'DD/MM/YY') FECHA_TRANSACCION,
 				--lpad(to_char(Nvl((ft1.net_amount),nvl((ft1.posted_amount),0)),'99999999999999'),20) valor_total,-- PRUEBA
 				lpad(to_char(Nvl(ft1.net_amount,nvl(ft1.posted_amount/ft1.exchange_rate,2)),'99999999999999'),20) valor_total,-- PRUEBA
