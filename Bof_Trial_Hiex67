@@ -14,7 +14,7 @@ function detailFormula return Char is
   cursor GetString is
 ------ cambiar la sentncia dentro de aca --------------------
 SELECT a.*,
-       decode(nv.name_type,'D',nv.passport,nv.tax1_no) tercero,
+       decode(nv.name_type,'D',nvl(nv.id_number,nv.passport),nv.tax2_no) tercero,
        nvl(nv.nationality,'xxx') nacionalidad, 
        nv.display_name,
        nv.name ntercero,
@@ -50,7 +50,11 @@ when ft.AR_LED_DEBIT is not null then 'AR_DB'
 WHEN ft.AR_LED_CREDIT is not null then 'AR_CR'  
 WHEN ft.DEP_LED_CREDIT  is not null then 'DEP_CR' 
 WHEN ft.DEP_LED_DEBIT is not null then 'DEP_DB'
-when ft.QUEUE_NAME = 'NC_HOC4' THEN 'NCREDITO' ELSE 'FACTURA' end tipo_doc,
+when ft.QUEUE_NAME = 'NCREDITO' THEN 'NCREDITO' 
+when ft.QUEUE_NAME = 'INTERNAL' THEN 'INTERNAL' 
+when ft.QUEUE_NAME = 'NC_ELEC' THEN 'NCREDITO'
+when ft.QUEUE_NAME = 'ELEC' THEN 'FACTURA'  
+ELSE 'FACTURA' end tipo_doc,
 
 case when ft.bill_no is null then nvl(rou.bill_to_name_id,ft.name_id) else ftax.payee_name_id end tercero_name_id,
 to_char(decode(nvl(ft.ar_led_credit,0),0,nvl(ftax.associated_bill_no,''),nvl(arp.cons_bill_no,''))) fact_asoc
