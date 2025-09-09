@@ -16,3 +16,20 @@ FROM clientes C WHERE  C.ident_cli = A.ident_cli) DISPLAY_NAME,'' NOMBRE,
 FROM Movfolio M,Cargos C,Maefolio A
 WHERE M.ccargo_car = C.ccargo_car AND M.nfolio = A.nfolio AND fecha = @Fecha1 AND  M.ccargo_car = 1002 
 AND ( m.plaza = '0' OR m.plaza IS NULL)
+
+UNION 
+
+SELECT 1003 COD,'Isla' CIA,fecha,M.nfolio RESERV, 1 TIP,A.ident_cli TERCERO,'001' SUC,'' NAC,
+CONVERT(int,(CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor )) VALOR,
+CASE WHEN ISNUMERIC(M.nrohab_hab) = 1 THEN CONVERT(varchar(10), M.nrohab_hab) ELSE '9999' END HAB,
+CASE  WHEN ISNUMERIC(recibocaj) = 1 THEN CONVERT(VARCHAR(10), recibocaj)ELSE NULL END RECIBO,
+nroregis TRX_NO,factura FACTURA,descri_car REFERENCIA,DBCR NOTAS,M.tcre NRO_TARJETA,M.autor AUTORIZACION,
+M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,tasachin_us VALOR_ME,(SELECT Max(nombre_cli) 
+FROM clientes C WHERE  C.ident_cli = A.ident_cli) DISPLAY_NAME,'' NOMBRE,
+(SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = A.ident_cli) address1,
+(SELECT Max(codciud) FROM Clientes C WHERE  C.ident_cli = A.ident_cli) city,
+(SELECT Max(codpais) FROM Clientes C WHERE  C.ident_cli = A.ident_cli) country,
+(SELECT Max(telef_cli) FROM Clientes C WHERE  C.ident_cli = A.ident_cli) phone_no
+FROM Movfolio M,Cargos C,Maefolio A
+WHERE M.ccargo_car = C.ccargo_car AND M.nfolio = A.nfolio AND fecha = @Fecha1 AND  M.ccargo_car = 1003 
+AND ( m.plaza = '0' OR m.plaza IS NULL)
