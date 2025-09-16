@@ -1,0 +1,12 @@
+
+--PPS  Documento Contable
+select * from dbo.t350_co_docto_contable where f350_id_cia = '8' AND f350_fecha= '2025-05-31' AND f350_id_tipo_docto ='PPS'
+
+
+-- movimiento del documento 
+select *  from t351_co_mov_docto where f351_id_cia = '8' AND f351_fecha= '2025-05-31' AND f351_rowid_docto ='1449485' AND f351_rowid_tercero= '197165'
+-- Tercero a consultar 
+select * from t202_mm_proveedores where f202_rowid_tercero ='197165'
+
+-- se debe d etomar el numero de la cuenta de esta tabla con el f253_id = 52053601            
+select  * from t253_co_auxiliares where f253_rowid = '4692'
