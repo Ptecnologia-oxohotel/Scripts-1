@@ -176,6 +176,49 @@ C.codcentro + '-' + ' PROPINA' NOTAS,'' NRO_TARJETA,'' AUTORIZACION,NULL FECHA_D
 '' DISPLAY_NAME,'' NOMBRE,'' address1,'' city,''country,'' phone_no
 FROM ps_consumos C  WHERE fecha = @Fecha2  and propinapagada <> 0  and PLAZA = ' '
 
+UNION 
+--EFECTIVO-CAJA GENERAL
+ select  9000 COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
+'' NAC, CONVERT(INT,valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
+nroregis TRX_NO, 12344 FACTURA, M.MOTIVO REFERENCIA, M.MOTIVO NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
+M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
+(SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
+ (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
+ (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
+ (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
+ (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
+ FROM movfolio M WHERE fecha = @Fecha1 AND FPAGO ='E' AND TRANSFERID = 'P'
+
+UNION 
+--VISA 9004
+
+  select  9004 COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
+'' NAC, valor  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
+nroregis TRX_NO, 12344 FACTURA, M.MOTIVO REFERENCIA, M.MOTIVO NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
+M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
+(SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
+ (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
+ (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
+ (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
+ (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
+ FROM movfolio M WHERE fecha =@Fecha1 AND PLAZA = 'VIS' and DBCR <> 'D' AND TRANSFERID = 'P'
+
+ UNION 
+
+ --CREDITO VISA POS REVISAR CODIGO DIFERENTE
+SELECT 9004  COD,39 CIA,C.FECHA,C.CUENTA RESERV,1 TIP,'333333333' TERCERO,'001' SUC,'' NAC,CONVERT(int,C.VVENTA*-1) VALOR,
+9999 HAB,C.TIQUETE RECIBO,C.CONSUID TRX_NO,C.tiquete FACTURA,P.descripcion REFERENCIA,A.TIPOPROD NOTAS,'' NRO_TARJETA,
+'' AUTORIZACION,NULL FECHA_DE_VENC,'' FACT_ASOC,'POS' TIPO_DOC,C.VVENTA VALOR_ME,'' DISPLAY_NAME,'' NOMBRE,'' address1,
+'' city,'' country,'' phone_no
+FROM ps_consumos C
+LEFT JOIN ps_cuentas Q ON c.FECHA = Q.FECHA AND C.CODCAJA = Q.CODCAJA AND C.CUENTA = Q.CUENTA
+LEFT JOIN Ps_producto P ON C.CODPRODUCTO = P.CODPRODUCTO
+LEFT JOIN  Ps_Agrupa A ON A.CODAGRUPA = P.CODAGRUPA
+WHERE C.fecha = @Fecha2 AND CODFPGO = 'TCV'
+
+
+
+
 
 
 
