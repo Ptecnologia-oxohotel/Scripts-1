@@ -3,6 +3,16 @@
 select * from dbo.t350_co_docto_contable where f350_id_cia = '8' AND f350_fecha= '2025-05-31' AND f350_id_tipo_docto ='PPS'
 
 
+
+--PPS  Documento Contable los tres docuemtnos totales 
+select * from dbo.t350_co_docto_contable where f350_id_cia = '8' 
+AND f350_id_tipo_docto ='PPS'  AND
+f350_id_tipo_docto ='APS'  
+ AND f350_id_tipo_docto ='NQ' 
+ 
+ AND  f351_fecha= '2025-05-01'
+
+
 -- movimiento del documento 
 select *  from t351_co_mov_docto where f351_id_cia = '8' AND f351_fecha= '2025-05-31' AND f351_rowid_docto ='1449485' AND f351_rowid_tercero= '197165'
 -- Tercero a consultar 
