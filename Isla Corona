@@ -246,8 +246,8 @@ WHERE U.fecha = @Fecha2 AND U.SERVICIO <> 0
 UNION 
 
 --1112
- select  CCARGO_CAR COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
- CONVERT(int,( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor )) VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
+ select  '1061' COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC,
+ CONVERT(int,( CASE WHEN dbcr = 'C' THEN 1 ELSE -1 END * valor )) VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
 nroregis TRX_NO, 12344 FACTURA, M.MOTIVO REFERENCIA, M.MOTIVO NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
 M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
 (SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
@@ -341,17 +341,27 @@ M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 EL
 
 
 UNION
+DECLARE @Fecha1 DATE = '2025-09-01';
+DECLARE @Fecha2 DATE = '20250901';
+
+select  M.DBCR, M.* from movfolio M WHERE fecha = @Fecha1 AND CCARGO_CAR = 1010 
 
  --DEPOSITOS RECIBIDOS
+
+ DECLARE @Fecha1 DATE = '2025-09-01';
+DECLARE @Fecha2 DATE = '20250901';
  select  1010 COD , 39 CIA,CONVERT(VARCHAR(10), M.FECHA, 103) AS FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC, CONVERT(int, valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
 nroregis TRX_NO, M.VOUCHE FACTURA, M.MOTIVO REFERENCIA, M.DBCR NOTAS,M.tcre NRO_TARJETA, M.autor AUTORIZACION,
-M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor ) VALORME,
+M.vcto FECHA_DE_VENC,'' FACT_ASOC,'' TIPO_DOC,  ( CASE WHEN dbcr = 'C' THEN -1 ELSE 1 END * valor ) VALORME,
 (SELECT Max(nombre_cli) FROM Clientes C WHERE  C.IDENT_CLI = M.IDENT_CLI) DISPLAY_NAME, '' NOMBRE,
  (SELECT Max(direcc_cli) FROM Clientes C WHERE  C.ident_cli = M.ident_cli) address1,
  (SELECT Max(codciud)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) city,
  (SELECT Max(codpais)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) country,
  (SELECT Max(telef_cli)FROM Clientes C WHERE  C.ident_cli = M.ident_cli) phone_no 
- FROM movfolio M WHERE fecha = @Fecha1 AND CCARGO_CAR = 1010 and DBCR = 'C'
+ FROM movfolio M WHERE fecha = @Fecha1 AND CCARGO_CAR = 1010 
+
+
+
 
 UNION
 
