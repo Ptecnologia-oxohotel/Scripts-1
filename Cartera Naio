@@ -1,0 +1,16 @@
+SELECT 
+    f351_rowid_tercero AS RowIdTercero,
+    RTRIM(f200_id) AS Documento,
+    f200_razon_social AS RazonSocial,
+    SUM(f351_valor_db - f351_valor_cr) AS Valor
+FROM t351_co_mov_docto
+INNER JOIN t200_mm_terceros 
+    ON f351_rowid_tercero = f200_rowid
+WHERE f351_id_cia = 47
+  AND f351_id_sucursal = 001
+  AND f200_ind_cliente = 1
+  AND f351_fecha BETWEEN '2025-06-01' AND '2025-09-30'
+ -- AND f200_id = '80755587'
+GROUP BY f200_razon_social, f200_id, f351_rowid_tercero
+HAVING SUM(f351_valor_db - f351_valor_cr) > 0
+ORDER BY f200_id;
