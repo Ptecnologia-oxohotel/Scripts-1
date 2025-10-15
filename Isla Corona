@@ -291,7 +291,7 @@ FROM ps_consumos C  WHERE fecha = @Fecha2  and C.CODFPGO = 'TCM'
 C.codcentro + '-' + ' PROPINA' NOTAS,'' NRO_TARJETA,'' AUTORIZACION,NULL FECHA_DE_VENC,'' FACT_ASOC,'POS' TIPO_DOC,0 VALOR_ME,
 '' DISPLAY_NAME,'' NOMBRE,'' address1,'' city,''country,'' phone_no
 FROM ps_consumos C  WHERE fecha = @Fecha2  AND C.CODFPGO = 'TDM'
-
+-- Hola
 UNION
   --MASTER
     select  9005 COD , 39 CIA,M.FECHA,  M.nfolio RESERV, 1 TIP, M.IDENT_CLI TERCERO, '001' SUC, CONVERT(INT,valor)  VALOR,'9999' HAB,CONVERT(VARCHAR(10), recibocaj) RECIBO, 
